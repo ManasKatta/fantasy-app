@@ -11,7 +11,7 @@ const PlayerCard = ({ playerID }) => {
     <div className="py-0.5">
         <a href={url}>
       <div className="container mx-auto">
-        <div className="flex bg-[#1e1e1e] border border-[#121212] rounded-xl overflow-hidden items-center justify-start">
+        <div className="flex bg-[#1e1e1e] border border-[#121212] rounded-xl overflow-hidden items-center justify-start hover:bg-[#ffb7c5]">
           <div className="relative w-32 h-20 flex-shrink-0">
             <div className="absolute left-0 top-0 w-full h-full flex items-center justify-center">
               <img
