@@ -1,6 +1,7 @@
 import React from "react";
-// import { useState } from "react";
-// import axios from "axios";
+
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Players from "../Players.json";
 
 const PlayerCard = ({ playerID }) => {
@@ -9,6 +10,18 @@ const PlayerCard = ({ playerID }) => {
     playerID
   ].team.toLowerCase()}.png`;
   const pfpURL = `https://sleepercdn.com/content/nfl/players/${playerID}.jpg`;
+ 
+  const [stats, setStats] = useState([])
+
+  useEffect(() => {
+    axios
+      .get(`http://localhost:5000/getPlayerStats/${Players[playerID].full_name}`)
+      .then((response) => {
+        setStats(response.data);
+      });
+  }, [playerID]);
+
+  console.log(stats)
 
   return (
     <div className="py-0.5">
@@ -33,7 +46,7 @@ const PlayerCard = ({ playerID }) => {
 
               <p className="text-sm text-[#a2d4ef] mt-1 line-clamp-2">
                 {Players[playerID].position}{" "}
-                <img className="h-7 w-7 inline" src={teamURL} />
+                <img className="h-7 w-7 inline" src={teamURL} /> FPTS: {stats[0]?.FantPt}
                 <br />
                 {Players[playerID].college}
               </p>
