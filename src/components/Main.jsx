@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import PlayerCard from "./PlayerCard";
-import axios from "axios";
-import { useEffect } from "react";
+// import axios from "axios";
+// import { useEffect } from "react";
 function Main() {
   const players = ["4046", "3198", "4034", "3321", "6794", "1466"];
   const trades = [["4046", "6794"], ["4984", "4039"]];
