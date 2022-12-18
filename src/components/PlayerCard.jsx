@@ -46,7 +46,9 @@ const PlayerCard = ({ playerID }) => {
 
               <p className="text-sm text-[#a2d4ef] mt-1 line-clamp-2">
                 {Players[playerID].position}{" "}
-                <img className="h-7 w-7 inline" src={teamURL} alt="team logo" /> FPTS: {stats[0]?.FantPt}
+                <img className="h-7 w-7 inline" src={teamURL} alt="team logo" /> FPTS: {stats[0]?.PPR}
+                <br />
+                Pos: {stats[0]?.PosRank} OVR: {stats[0]?.OvRank} 
                 <br />
                 {Players[playerID].college}
               </p>

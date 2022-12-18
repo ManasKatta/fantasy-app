@@ -27,7 +27,7 @@ function Main() {
 
       <div className="px-10"></div>
 
-      <div className="text-white px-2 py-2 font-bold bg-[#121212] rounded-lg overflow-auto">
+      <div className="text-white px-2 py-2 font-bold bg-[#121212] rounded-lg overflow-auto scroll-smooth scrollbar-hide">
         Trade Suggestion
         {trades[0].map((playerID) => (
           <PlayerCard playerID={playerID} />
