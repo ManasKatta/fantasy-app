@@ -17,7 +17,7 @@ function Main() {
 
   // console.log(trending);
   return (
-    <div className="flex flex-row justify-center justify-items-center bg-black h-screen py-20 px-10">
+    <div className="flex flex-row justify-center justify-items-center bg-black h-screen py-20 px-10 overflow-auto scroll-smooth scrollbar-hide">
       <div className="flex flex-col text-white h-full font-bold bg-[#121212] rounded-lg py-2 px-2 overflow-auto scroll-smooth scrollbar-hide">
         Your Team
         {players.map((playerID) => (

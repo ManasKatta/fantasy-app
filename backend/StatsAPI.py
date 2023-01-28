@@ -1,33 +1,32 @@
+import pymysql
 from flask import Flask, request, jsonify
 #from markupsafe import Markup
 import json
 from flaskext.mysql import MySQL
-from pymysql.cursors import DictCursor
+
+host = 'playerstats2022.cdwkaxkzcufq.us-east-2.rds.amazonaws.com'
+user = 'admin'
+password = 'Manas135'
+database = 'fantasyapp'
+
+
 
 
 app = Flask(__name__)
-
-mysql = MySQL(cursorclass=DictCursor)
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'Manas135'
-app.config['MYSQL_DATABASE_DB'] = 'capstone'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
-
-
-
-mysql.init_app(app)
-# conn = mysql.connect()
-#mycursor = conn.cursor()
-
 @app.route('/getPlayerStats/<string:name>', methods=['GET'])
 def get_player_stats(name):
     query_parameter = '%' + name + '%'
-    conn = mysql.connect()
-    mycursor = conn.cursor()
+    connection = pymysql.connect(host= host,
+                             user= user,
+                             password= password,
+                             database= database,
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
+    mycursor = connection.cursor()
     mycursor.execute("SELECT * FROM playerstats2022 WHERE Player LIKE %s", (query_parameter)) 
     result = mycursor.fetchall()
     mycursor.close()
-    conn.close()
+    connection.close()
     return (jsonify(result))
 
 
