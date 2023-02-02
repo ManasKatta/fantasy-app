@@ -16,11 +16,11 @@ class FantasyBoost:
             self.__get_qb()  # self.seasonal_data gets updated within this function
             # self.seasonal_data.to_csv('jalen_hurts.csv')
         elif player_pos == 'RB':
-            self.__get_rb()
+            self.__get_rb_wr_te(flag=0)
         elif player_pos == 'WR':
-            self.__get_wr()
+            self.__get_rb_wr_te(flag=1)
         elif player_pos == 'TE':
-            self.__get_te()
+            self.__get_rb_wr_te(flag=1)
 
         self.x, self.regressor = self.__train()
 
@@ -50,14 +50,68 @@ class FantasyBoost:
 
     # Still need RBs, WRs, TEs, K, Defense
 
-    def __get_te(self):
-        pass
+    def __get_rb_wr_te(self, flag: int):
+        # This function calculates a rough estimate for a RBs fantasy points
+        fantasy_points = []
 
-    def __get_wr(self):
-        pass
+        if flag == 0:
+            df = self.__scrape(0)  # get rushing or receiving
+            df2 = self.__scrape(1)  # get receiving or receiving
+        else:
+            df = self.__scrape(1)  # get rushing or receiving
+            df2 = self.__scrape(0)  # get receiving or receiving
 
-    def __get_rb(self):
-        pass
+        for i in range(df.shape[0] - 1):
+            # rushing TD
+            rush_td = df.at[i, 'TD']
+            points = (rush_td * 6)
+
+            # rushing YDs
+            rush_yds = df.at[i, 'YDS'] * 0.1
+            points += rush_yds
+
+            # receiving TD
+            rush_td = df2.at[i, 'TD']
+            points += (rush_td * 6)
+
+            # receiving YDs
+            rush_yds = df2.at[i, 'YDS'] * 0.1
+            points += rush_yds
+
+            fantasy_points.append(points)
+
+        df, df2, fantasy_points = self.__helper(df, df2, fantasy_points)
+
+        # copy dataframe to make the target column for the XGBoost
+        temp = pd.DataFrame()
+        temp['ru-ATT'] = df['ATT']
+        temp['ru-YDS'] = df['YDS']
+        temp['ru-AVG'] = df['AVG']
+        temp['ru-LNG'] = df['LNG']
+        temp['ru-TD'] = df['TD']
+        temp['ru-1st'] = df['1st']
+        temp['ru-1st%'] = df['1st%']
+        temp['ru-20+'] = df['20+']
+        temp['ru-40+'] = df['40+']
+        temp['ru-FUM'] = df['FUM']
+        temp['re-REC'] = df2['REC']
+        temp['re-YDS'] = df2['YDS']
+        temp['re-AVG'] = df2['AVG']
+        temp['re-LNG'] = df2['LNG']
+        temp['re-TD'] = df2['TD']
+        temp['re-1st'] = df2['1st']
+        temp['re-1st'] = df2['1st%']
+        temp['re-20+'] = df2['20+']
+        temp['re-40+'] = df2['40+']
+        temp['Fantasy Points'] = df['Fantasy Points']
+        target = df['Fantasy Points'].tolist()
+        target.pop(0)
+        target.append(0)
+        temp['Target'] = target
+        df = temp
+        df = df[::-1]  # reverse the rows
+
+        self.seasonal_data = df.fillna(0)  # update data
 
     def __get_qb(self):
         # This function calculates a rough estimate for a QBs fantasy points
@@ -88,23 +142,7 @@ class FantasyBoost:
 
             fantasy_points.append(points)
 
-        fantasy_points.append(sum(fantasy_points))  # this line calculates the total sum of all fantasy points on table
-        df['Fantasy Points'] = fantasy_points
-
-        # get rid of total row and bad data
-        df.drop(df.shape[0] - 1, axis=0, inplace=True)
-        df2.drop(df2.shape[0] - 1, axis=0, inplace=True)
-
-        df.drop('YEAR', axis=1, inplace=True)
-        df.drop('TEAM', axis=1, inplace=True)
-        df.drop('G', axis=1, inplace=True)
-
-        df2.drop('YEAR', axis=1, inplace=True)
-        df2.drop('TEAM', axis=1, inplace=True)
-        df2.drop('G', axis=1, inplace=True)
-
-        df = df[::-1]  # reverse the rows
-        df2 = df2[::-1]
+        df, df2, fantasy_points = self.__helper(df, df2, fantasy_points)
 
         # copy dataframe to make the target column for the XGBoost
         temp = pd.DataFrame()
@@ -142,12 +180,45 @@ class FantasyBoost:
         self.seasonal_data = df.fillna(0)  # update data
         # self.seasonal_data.drop(0, axis=0, inplace=True)  # used for tweaking the model
 
+    def __helper(self, df: pd.DataFrame, df2: pd.DataFrame, fantasy_points: [float]):
+        fantasy_points.append(sum(fantasy_points))  # this line calculates the total sum of all fantasy points on table
+        df['Fantasy Points'] = fantasy_points
+
+        # get rid of total row and bad data
+        df.drop(df.shape[0] - 1, axis=0, inplace=True)
+        df2.drop(df2.shape[0] - 1, axis=0, inplace=True)
+
+        df.drop('YEAR', axis=1, inplace=True)
+        df.drop('TEAM', axis=1, inplace=True)
+        df.drop('G', axis=1, inplace=True)
+
+        df2.drop('YEAR', axis=1, inplace=True)
+        df2.drop('TEAM', axis=1, inplace=True)
+        df2.drop('G', axis=1, inplace=True)
+
+        df = df[::-1]  # reverse the rows
+        df2 = df2[::-1]
+
+        return df, df2, fantasy_points
+
 
 # example use
 fb = FantasyBoost(player_name='jalen-hurts', player_pos='QB')
 pred = fb.predict()
-print(pred)
+print("Jalen Hurts: ", pred)
 
-fb.change(player_name='patrick-mahomes', player_pos='QB')
+fb.change(player_name='tom-brady', player_pos='QB')
 pred = fb.predict()
-print(pred)
+print("Tom Brady: ", pred)
+
+fb.change(player_name='derrick-henry', player_pos='RB')
+pred = fb.predict()
+print("Derrick Henry: ", pred)
+
+fb.change(player_name='tyreek-hill', player_pos='WR')
+pred = fb.predict()
+print("Tyreek Hill: ", pred)
+
+fb.change(player_name='george-kittle', player_pos='TE')
+pred = fb.predict()
+print("George Kittle: ", pred)
