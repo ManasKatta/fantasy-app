@@ -22,6 +22,8 @@ class FantasyBoost:
             self.__get_rb_wr(flag=1)
         elif player_pos == 'TE':
             self.__get_te()
+        elif player_pos == 'K':
+            self.__get_k()
 
         self.x, self.regressor = self.__train()
 
@@ -40,7 +42,7 @@ class FantasyBoost:
 
     def __train(self) -> Union[pd.DataFrame, xgb.XGBRegressor]:
         data, label = self.seasonal_data.iloc[:, :-1], self.seasonal_data.iloc[:, -1]
-        xgb.DMatrix(data=data, label=label)
+        xgb.DMatrix(data=data, label=label, enable_categorical=True)
 
         data_train, data_test = data.iloc[1:], data.iloc[:1]  # most recent season
         label_train, label_test = label.iloc[1:], label.iloc[:1]
@@ -55,20 +57,124 @@ class FantasyBoost:
         # print("Test: ", label_test.to_string())  # used for tweaking the model
         return data_test, regressor
 
-    # Still need K, Defense
+    # Still need Defense
+
+    def __get_k(self):
+        # deal with the kicker stuff
+        fantasy_points = []
+        df = self.__scrape(0)  # get kicking
+
+        dict = {'0': [], '1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': []}
+        final_df = pd.DataFrame(dict)
+
+        for i in range(df.shape[0] - 1):
+            points = 0
+            contents = []
+
+            # calculate points gained and penalty for 0-39 yd FGs
+            data = df.at[i, '30-39']
+            data = data.split('-')
+
+            temp1 = int(data[0])
+            other = int(data[1])
+            penalty = other - temp1
+
+            data = df.at[i, '20-29']
+            data = data.split('-')
+            temp2 = int(data[0])
+            other = int(data[1])
+            penalty += other - temp2
+
+            data = df.at[i, '1-19']
+            data = data.split('-')
+            temp3 = int(data[0])
+            other = int(data[1])
+            penalty += other - temp3
+
+            points += (temp1 + temp2) * 5
+            points -= penalty * 2
+
+            contents.append(temp1 + temp2)
+            contents.append(penalty)
+
+            # calculate points gained and penalty for 40-49 yard FGs
+            data = df.at[i, '40-49']
+            data = data.split('-')
+            temp1 = int(data[0])
+            other = int(data[1])
+            penalty = other - temp1
+
+            points += temp1 * 4
+            points -= penalty
+
+            contents.append(temp1)
+            contents.append(penalty)
+
+            # calculate points gained for 50+ yard FGs
+            data = df.at[i, '60+']
+            data = data.split('-')
+            temp1 = int(data[0])
+
+            data = df.at[i, '50-59']
+            data = data.split('-')
+            temp2 = int(data[0])
+
+            points += (temp1 + temp2) * 5
+
+            # formulate the data so xgboost can interpret it
+            contents.append(temp1 + temp2)
+            contents.append(df.at[i, 'FGM'])
+            contents.append(df.at[i, 'FG ATT'])
+            contents.append(df.at[i, 'PCT'])
+            temp = pd.DataFrame(dict)
+            temp.loc[len(df.index)] = contents
+            final_df = pd.concat([final_df, temp], axis=0)
+
+            fantasy_points.append(points)
+
+        fantasy_points.append(sum(fantasy_points))  # this line calculates the total sum of all fantasy points on table
+        df['Fantasy Points'] = fantasy_points
+
+        df.drop('YEAR', axis=1, inplace=True)
+        df.drop('TEAM', axis=1, inplace=True)
+        df.drop('G', axis=1, inplace=True)
+
+        df.drop(df.shape[0] - 1, axis=0, inplace=True)
+
+        df = df[::-1]
+
+        temp = pd.DataFrame()
+        temp['0-39-good'] = final_df['0']
+        temp['0-39-miss'] = final_df['1']
+        temp['40-49-good'] = final_df['2']
+        temp['40-49-miss'] = final_df['3']
+        temp['50+good'] = final_df['4']
+        temp['FGM'] = final_df['5']
+        temp['FG ATT'] = final_df['6']
+        temp['PCT'] = final_df['7']
+        temp['Fantasy Points'] = df['Fantasy Points']
+        target = df['Fantasy Points'].tolist()
+        target.pop(0)
+        target.append(0)
+        temp['Target'] = target
+        df = temp
+        df = df[::-1]  # reverse the rows
+
+        self.seasonal_data = df.fillna(0)  # update data
 
     def __get_te(self):
         fantasy_points = []
         df = self.__scrape(0)  # get receiving
 
         for i in range(df.shape[0] - 1):
+            # for te
             points = 0
 
-            # rushing TD
+            # receiving TD
             rush_td = df.at[i, 'TD']
             points += (rush_td * 6)
 
-            # rushing YDs
+            # receiving YDs
             rush_yds = df.at[i, 'YDS'] * 0.1
             points += rush_yds
 
