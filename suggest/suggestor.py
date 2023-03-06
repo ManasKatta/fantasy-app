@@ -51,14 +51,20 @@ class Trade():
 
 class Suggestor():
 
-    def __init__(self, playerfile, leaguefile):
+    def __init__(self, leaguefile):
         self.league_size = 0
         self.rb_num = 0
         self.wr_num = 0
         self.te_num = 0
         self.qb_num = 0
+
+        self.player_list = []
     
-        self.read_player_info(playerfile)
+        self.read_player_info("qb_preds_seasonal.csv")
+        self.read_player_info("rb_preds_seasonal.csv")
+        self.read_player_info("te_preds_seasonal.csv")
+        self.read_player_info("wr_preds_seasonal.csv")
+
         self.read_league_info(leaguefile)
 
         self.make_arrays()
@@ -71,7 +77,6 @@ class Suggestor():
         return
 
     def read_player_info(self, playerfile):                                     # Reads from the player data input file
-        self.player_list = []
         
         pfile = pd.read_csv(playerfile)
 
@@ -202,7 +207,7 @@ def main():
     playerfile = "players.csv"
     leaguefile = "league.txt"
 
-    sug = Suggestor(playerfile, leaguefile)
+    sug = Suggestor(leaguefile)
     
 
 main()
