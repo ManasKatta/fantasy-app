@@ -2,11 +2,12 @@
 # It outputs an array of trades and the value of each trade.
 
 import pandas as pd
-PRINT_DEBUG = True
+PRINT_DEBUG = False
 
 def printd(string):
     if PRINT_DEBUG:
         print(str(string))
+
     return
 
 class Player():
@@ -32,19 +33,27 @@ class Player():
         return
 
 class Trade():
-    def __init__(self, give1, receive1, value):
-        self.g1 = give1
-        self.r1 = receive1
-        self.val = value
+    def __init__(self, give, receive):
+        self.g1 = give
+        self.r1 = receive
+        self.generate_value()
 
     def print_trade(self):
-        print(f"Give {self.g1} for {self.r1}, value: {self.val}")
+        print(f"Give {self.g1[0].id} for {self.r1[0].id}, value: {self.val}")
 
     def get_given(self):
         return self.g1
 
     def get_received(self):
         return self.r1
+    
+    def generate_value(self):
+        value=0
+        for p1 in self.g1:
+            value-=p1.par
+        for p2 in self.r1:
+            value+=p2.par
+        self.val = value
 
     def get_value(self):
         return self.val
@@ -74,6 +83,11 @@ class Suggestor():
         self.print_lists()
         return
 
+    def get_player(self, id):
+        for p in self.player_list:
+            if p.id==id:
+                return p
+
     def read_player_info(self, playerfile):                                     # Reads from the player data input file
         
         pfile = pd.read_csv(playerfile)
@@ -96,6 +110,24 @@ class Suggestor():
         self.wr_num = 2
         self.qb_num = 1
         self.te_num = 1
+
+        rosters = [['josh-allen-4','jonathan-taylor','derrick-henry','justin-jefferson','cooper-kupp','mark-andrews'],['patrick-mahomes','dalvin-cook','austin-ekeler','tyreek-hill','jaylen-waddle','travis-kelce']]
+        self.roster_list = []
+
+        for r in rosters:
+            r1 = []
+            for p in r:
+                p1 = self.get_player(p)
+                r1.append(p1)
+            self.roster_list.append(r1)
+
+        p1roster = ['josh-allen-4','jonathan-taylor','derrick-henry','justin-jefferson','cooper-kupp','mark-andrews']
+        self.p1_roster = []
+
+        for p in p1roster:
+            p1 = self.get_player(p)
+            self.p1_roster.append(p1)
+
         printd(f'RB num: {self.rb_num}')
         return
 
@@ -199,11 +231,50 @@ class Suggestor():
         printd(f"RB Avg = {self.rb_avg}    WR Avg = {self.wr_avg}    TE Avg = {self.te_avg}    QB Avg = {self.qb_avg}")
         printd(f"RB Repl = {self.rb_repl}    WR Repl = {self.wr_repl}    TE Repl = {self.te_repl}    QB Repl = {self.qb_repl}")
 
+    def get_11(self, roster):
+        for p1 in self.p1_roster:
+            printd('here')
+            for p2 in roster:
+                printd('now here')
+                t1 = Trade([p1],[p2])
+                printd("trade generated")
+                #t1.print_trade()
+                if t1.get_value() > self.trade_value_min and t1.get_value() < self.trade_value_max:
+                    printd("trade within bounds")
+                    self.trade_list.append(t1)
+                else:
+                    del t1
+
+    def get_trades(self, roster):
+        self.get_11(roster)
+        '''self.get_12(roster)
+        self.get_21(roster)
+        self.get_22(roster)'''
+
+    def generate_trades(self, value_min, value_max):
+        self.trade_value_min = value_min
+        self.trade_value_max = value_max
+        self.trade_list = []
+        printd(str(self.roster_list))
+        for roster in self.roster_list:
+            printd(str(roster))
+            if roster==self.p1_roster:
+                continue
+            else:
+                printd("getting trades")
+                self.get_trades(roster)
+
+    def print_trades(self):
+        printd("printing trades")
+        for trade in self.trade_list:
+            trade.print_trade()
+
 
 def main():
     leaguefile = "league.txt"
     playerfiles = ['qb_preds_seasonal.csv','wr_preds_seasonal.csv','te_preds_seasonal.csv','rb_preds_seasonal.csv']
     sug = Suggestor(playerfiles,leaguefile)
-    
+    sug.generate_trades(0,20)
+    sug.print_trades()
 
 main()
