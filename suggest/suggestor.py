@@ -282,6 +282,20 @@ class Suggestor():
         return
 
     def get_22(self,roster):
+        num1 = 1
+        for p1 in self.p1_roster:
+            for p2 in self.p1_roster[num1:]:
+                num2 = 1
+                for p3 in roster:
+                    for p4 in roster[num2:]:
+                        t1 = Trade([p1,p2],[p3,p4])
+                        #t1.print_trade()
+                        if t1.get_value() > self.trade_value_min and t1.get_value() < self.trade_value_max:
+                            self.trade_list.append(t1)
+                        else:
+                            del t1
+                    num2+=1
+            num1+=1
         return
 
     def get_trades(self, roster):
@@ -313,7 +327,7 @@ def main():
     leaguefile = "league.txt"
     playerfiles = ['qb_preds_seasonal.csv','wr_preds_seasonal.csv','te_preds_seasonal.csv','rb_preds_seasonal.csv']
     sug = Suggestor(playerfiles,leaguefile)
-    sug.generate_trades(-50,50)
+    sug.generate_trades(0,5)
     sug.print_trades()
 
 main()
