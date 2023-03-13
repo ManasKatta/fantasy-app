@@ -39,7 +39,14 @@ class Trade():
         self.generate_value()
 
     def print_trade(self):
-        print(f"Give {self.g1[0].id} for {self.r1[0].id}, value: {self.val}")
+        if len(self.g1)==1 and len(self.r1)==1:
+            print(f"Give {self.g1[0].id} for {self.r1[0].id}, value: {self.val}")
+        elif len(self.g1)==1 and len(self.r1)==2:
+            print(f"Give {self.g1[0].id} for {self.r1[0].id} and {self.r1[1].id}, value: {self.val}")
+        elif len(self.g1)==2 and len(self.r1)==1:
+            print(f"Give {self.g1[0].id} and {self.g1[1].id} for {self.r1[0].id}, value: {self.val}")
+        else:
+            print(f"Give {self.g1[0].id} and {self.g1[1].id} for {self.r1[0].id} and {self.r1[1].id}, value: {self.val}")
 
     def get_given(self):
         return self.g1
@@ -245,11 +252,43 @@ class Suggestor():
                 else:
                     del t1
 
+    def get_12(self,roster):
+        num = 1
+        for p1 in self.p1_roster:
+            for p2 in self.p1_roster[num:]:
+                for p3 in roster:
+                    t1 = Trade([p1,p2],[p3])
+                    #t1.print_trade()
+                    if t1.get_value() > self.trade_value_min and t1.get_value() < self.trade_value_max:
+                        self.trade_list.append(t1)
+                    else:
+                        del t1
+            num+=1
+        return
+
+    def get_21(self,roster):
+        for p1 in self.p1_roster:
+            num = 1
+            for p2 in roster:
+                for p3 in roster[num:]:
+                    t1 = Trade([p1],[p2,p3])
+                    #t1.print_trade()
+                    if t1.get_value() > self.trade_value_min and t1.get_value() < self.trade_value_max:
+                        self.trade_list.append(t1)
+                    else:
+                        del t1
+
+                num+=1
+        return
+
+    def get_22(self,roster):
+        return
+
     def get_trades(self, roster):
         self.get_11(roster)
-        '''self.get_12(roster)
+        self.get_12(roster)
         self.get_21(roster)
-        self.get_22(roster)'''
+        self.get_22(roster)
 
     def generate_trades(self, value_min, value_max):
         self.trade_value_min = value_min
@@ -274,7 +313,7 @@ def main():
     leaguefile = "league.txt"
     playerfiles = ['qb_preds_seasonal.csv','wr_preds_seasonal.csv','te_preds_seasonal.csv','rb_preds_seasonal.csv']
     sug = Suggestor(playerfiles,leaguefile)
-    sug.generate_trades(0,20)
+    sug.generate_trades(-50,50)
     sug.print_trades()
 
 main()
