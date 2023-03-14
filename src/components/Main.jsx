@@ -1,19 +1,19 @@
 import React from "react";
 import PlayerCard from "./PlayerCard";
-// import axios from "axios";
-// import { useEffect } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 function Main() {
-  const players = ["4046", "3198", "4034", "3321", "6794", "1466", "5850"];
+  const players = ["4046", "3198", "4034", "2133", "7564", "3321", "6794", "1466", "5850"];
   const trades = [["4046", "6794"], ["4984", "4039"]];
-  // const [trending, setTrending] = useState([]);
+  const [trending, setTrending] = useState([]);
 
-  // useEffect(() => {
-  //   axios
-  //     .get("https://api.sleeper.app/v1/players/nfl/trending/add")
-  //     .then((response) => {
-  //       setTrending(response.data);
-  //     });
-  // }, []);
+  useEffect(() => {
+    axios
+      .get("https://api.sleeper.app/v1/players/nfl/trending/add")
+      .then((response) => {
+        setTrending(response.data);
+      });
+  }, []);
 
   // console.log(trending);
   return (
@@ -38,14 +38,14 @@ function Main() {
         ))}
       </div>
             
-      {/* <div className="px-10"></div>
+      <div className="px-10"></div>
 
       <div className="flex flex-col text-white h-full font-bold bg-[#121212] rounded-lg py-2 px-2 overflow-auto scroll-smooth scrollbar-hide">
         Trending Players
         {trending.map((player) => (
           <PlayerCard playerID={player.player_id} />
         ))}
-      </div> */}
+      </div>
     </div>
   );
 }
