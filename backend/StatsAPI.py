@@ -4,10 +4,10 @@ from flask import Flask, request, jsonify
 import json
 from flaskext.mysql import MySQL
 
-host = 'playerstats2022.cdwkaxkzcufq.us-east-2.rds.amazonaws.com'
-user = 'admin'
+host = 'localhost'
+user = 'root'
 password = 'Manas135'
-database = 'fantasyapp'
+database = 'capstone'
 
 
 
@@ -24,6 +24,22 @@ def get_player_stats(name):
                              cursorclass=pymysql.cursors.DictCursor)
     mycursor = connection.cursor()
     mycursor.execute("SELECT * FROM playerstats2022 WHERE Player LIKE %s", (query_parameter)) 
+    result = mycursor.fetchall()
+    mycursor.close()
+    connection.close()
+    return (jsonify(result))
+
+@app.route('/getTop/', methods=['GET'])
+def get_top():
+    #query_parameter = '%' + name + '%'
+    connection = pymysql.connect(host= host,
+                             user= user,
+                             password= password,
+                             database= database,
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
+    mycursor = connection.cursor()
+    mycursor.execute("SELECT * FROM playerstats2022 ORDER BY FantPt DESC LIMIT 10") 
     result = mycursor.fetchall()
     mycursor.close()
     connection.close()
