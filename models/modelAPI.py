@@ -16,6 +16,10 @@ def index():
 
 @app.route('/GetValue/<string:name>/<string:pos>', methods=['GET'])
 def get_value(name, pos):
-    xgbmodule.fb.change(player_name=name, player_pos=pos)
-    result = xgbmodule.fb.predict()
-    return (jsonify(result))
+    fb = xgbmodule.FantasyBoost(player_name=name, player_pos=pos)
+    
+    result = fb.predict()
+    return (jsonify(result.tolist()))
+
+if __name__ == '__main__':
+    app.run(debug=True,host='0.0.0.0', port=7000)
