@@ -30,8 +30,8 @@ print()
 
 for x in range(len(rosters_response.json())):
     print(f"{league_users_response.json()[x]['display_name']}:", end = " ")
-    for y in rosters_response.json()[x]['starters']:
+    for y in rosters_response.json()[x]['players']:
         try:
-            print(f"{players_response.json()[y]['full_name']} ", end = " ")
+            print(f"{players_response.json()[y]['full_name']}({players_response.json()[y]['player_id']}) ", end = " ")
         except:
-            print(y)
+            print(f"{y}")
