@@ -5,7 +5,6 @@ username = input("Please enter your username: ")
 
 try:
     user_response = requests.get(f"https://api.sleeper.app/v1/user/{username}")
-    print(f"User ID: {user_response.json()['user_id']}")
 except:
     print("Error!")
     sys.exit()
@@ -16,15 +15,12 @@ league_name = input("Please enter the name of your league: ")
 
 i = -1
 for league in league_response.json():
-    print(league['name'])
     if league['name'] == league_name:
         i = league_response.json().index(league)
 
 if i == -1:
     print("Error!")
     sys.exit()
-
-print(f"League ID: {league_response.json()[i]['league_id']}")
 
 league_users_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[0]['league_id']}/users")
 rosters_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[0]['league_id']}/rosters")
