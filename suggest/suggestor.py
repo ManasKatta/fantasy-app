@@ -2,7 +2,9 @@
 # It outputs an array of trades and the value of each trade.
 
 import pandas as pd
-PRINT_DEBUG = False
+import json
+
+PRINT_DEBUG = True
 
 def printd(string):
     if PRINT_DEBUG:
@@ -111,7 +113,18 @@ class Suggestor():
         return
 
     def read_league_info(self, leaguefile):                                     # Reads from the league info file
-        self.league_size = 2
+        with open(leaguefile) as f:
+            leagueinfo = f.readlines()
+        
+        leagueinfo = leagueinfo[5:20]
+        fullstringinfo = ''
+        for i in range(0,len(leagueinfo)):
+            fullstringinfo += leagueinfo[i]
+        fullstringinfo = fullstringinfo[1:-2]
+        printd(str(fullstringinfo))
+        league_info = json.loads(fullstringinfo)
+        
+        self.league_size = league_info["total_rosters"]
         self.league_ppr = 0
         self.rb_num = 2
         self.wr_num = 2
@@ -318,16 +331,16 @@ class Suggestor():
                 self.get_trades(roster)
 
     def print_trades(self):
-        printd("printing trades")
+        print("printing trades")
         for trade in self.trade_list:
             trade.print_trade()
 
 
 def main():
-    leaguefile = "league.txt"
+    leaguefile = "json/league.json"
     playerfiles = ['qb_preds_seasonal.csv','wr_preds_seasonal.csv','te_preds_seasonal.csv','rb_preds_seasonal.csv']
     sug = Suggestor(playerfiles,leaguefile)
-    sug.generate_trades(0,5)
+    sug.generate_trades(-50,50)
     sug.print_trades()
 
 main()
