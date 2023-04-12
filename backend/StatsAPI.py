@@ -15,8 +15,8 @@ def call_api(username, league_name):
     try:
         user_response = requests.get(f"https://api.sleeper.app/v1/user/{username}")
         league_response = requests.get(f"https://api.sleeper.app/v1/user/{user_response.json()['user_id']}/leagues/nfl/2023")
-    except:
-        return "Error"
+    except Exception as e:
+        return f"Error: {e}"
 
     i = -1
     for league in league_response.json():
@@ -24,10 +24,10 @@ def call_api(username, league_name):
             i = league_response.json().index(league)
 
     if i == -1:
-        return "Error"
+        return "Error: League not found"
 
-    league_users_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[0]['league_id']}/users")
-    rosters_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[0]['league_id']}/rosters")
+    league_users_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[i]['league_id']}/users")
+    rosters_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[i]['league_id']}/rosters")
     #players_response = requests.get("https://api.sleeper.app/v1/players/nfl")
 
     for x in range(len(rosters_response.json())):
