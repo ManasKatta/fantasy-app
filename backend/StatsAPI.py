@@ -34,7 +34,7 @@ def call_api(username, league_name):
         if league_users_response.json()[x]['display_name'] == username:
             for y in range(len(rosters_response.json())):
                 if(league_users_response.json()[x]['user_id'] == rosters_response.json()[y]['owner_id']):
-                    return rosters_response.json()[y]
+                    return rosters_response.json()[y]['players']
     
     
 

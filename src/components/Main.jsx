@@ -1,8 +1,8 @@
 import React from "react";
 import PlayerCard from "./PlayerCard";
 import axios from "axios";
-//import Input from "./Input";
 import { useEffect, useState } from "react";
+
 function Main() {
   const [players, setPlayers] = useState([]);
   //const players = ["4046", "3198", "4034", "2133", "7564", "3321", "6794", "1466", "5850"];
