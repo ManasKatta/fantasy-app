@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify
 import json
 from flaskext.mysql import MySQL
 
+
 host = 'localhost'
 user = 'root'
 password = 'Manas135'
@@ -44,6 +45,8 @@ def get_top():
     mycursor.close()
     connection.close()
     return (jsonify(result))
+
+
 
 
 if __name__ == '__main__':
