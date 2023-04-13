@@ -6,38 +6,53 @@ from typing import Union
 class FantasyBoost:
 
     def __init__(self, player_name: str, player_pos: str):
-        self.player_name, self.seasonal_data, self.x, self.regressor = None, None, None, None
+        self.player_name, self.player_pos, self.seasonal_data, self.x, self.regressor = None, None, None, None, None
+        self.d_pred = None
         self.change(player_name, player_pos)
 
     def change(self, player_name: str, player_pos: str):
         self.player_name = player_name
-        player_pos = player_pos.upper()
+        self.player_pos = player_pos.upper()
 
-        if player_pos == 'QB':
+        if self.player_pos == 'QB':
             self.__get_qb()  # self.seasonal_data gets updated within this function
             # self.seasonal_data.to_csv('jalen_hurts.csv')
-        elif player_pos == 'RB':
+        elif self.player_pos == 'RB':
             self.__get_rb_wr(flag=0)
-        elif player_pos == 'WR':
+        elif self.player_pos == 'WR':
             self.__get_rb_wr(flag=1)
-        elif player_pos == 'TE':
+        elif self.player_pos == 'TE':
             self.__get_te()
-        elif player_pos == 'K':
+        elif self.player_pos == 'K':
             self.__get_k()
+        elif self.player_pos == 'D':
+            self.d_pred = self.__get_d()
 
-        self.x, self.regressor = self.__train()
+        if self.player_pos != 'D':
+            self.x, self.regressor = self.__train()
 
     def predict(self) -> [float]:
         if self.x is None and self.regressor is None:
+            if self.player_pos == 'D':
+                return self.d_pred
+
             return "Not enough data to predict."
-        return self.regressor.predict(self.x)
+
+        if self.player_pos != 'D':
+            return self.regressor.predict(self.x)
 
     def __scrape(self, option: int) -> pd.DataFrame:
-        url_head = r'https://www.nfl.com/players/'
-        url_feet = '/stats/career'
-        url = url_head + self.player_name + url_feet
-        df = pd.read_html(url)
+        url = None
 
+        if self.player_pos == 'D':
+            # hacky way to get seasonal defensive stats
+            url = 'https://www.fantasypros.com/nfl/stats/dst.php'
+        else:
+            url_head = r'https://www.nfl.com/players/'
+            url_feet = '/stats/career'
+            url = url_head + self.player_name + url_feet
+
+        df = pd.read_html(url)
         return df[option]  # option of 0 = first table, 1 = second table
 
     def __train(self) -> Union[pd.DataFrame, xgb.XGBRegressor]:
@@ -59,13 +74,22 @@ class FantasyBoost:
 
     # Still need Defense
 
+    def __get_d(self):
+        # deal with the defensive stuff
+        df = self.__scrape(0)
+
+        x = df.loc[df['Player'] == self.player_name]
+        fpts = x.at[x.index[0], 'FPTS']
+
+        return fpts
+
     def __get_k(self):
         # deal with the kicker stuff
         fantasy_points = []
         df = self.__scrape(0)  # get kicking
 
-        dict = {'0': [], '1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': []}
-        final_df = pd.DataFrame(dict)
+        my_dict = {'0': [], '1': [], '2': [], '3': [], '4': [], '5': [], '6': [], '7': []}
+        final_df = pd.DataFrame(my_dict)
 
         for i in range(df.shape[0] - 1):
             points = 0
@@ -126,7 +150,7 @@ class FantasyBoost:
             contents.append(df.at[i, 'FGM'])
             contents.append(df.at[i, 'FG ATT'])
             contents.append(df.at[i, 'PCT'])
-            temp = pd.DataFrame(dict)
+            temp = pd.DataFrame(my_dict)
             temp.loc[len(df.index)] = contents
             final_df = pd.concat([final_df, temp], axis=0)
 
