@@ -4,11 +4,14 @@ from flask import Flask, request, jsonify
 import json
 from flaskext.mysql import MySQL
 import requests
+import suggestor
 
 host = 'localhost'
 user = 'root'
 password = 'Manas135'
 database = 'capstone'
+
+players_dict = {}
 
 
 def call_api(username, league_name):
@@ -26,17 +29,19 @@ def call_api(username, league_name):
     if i == -1:
         return "Error: League not found"
 
+    players_dict['username'] = username
+    players_dict['roster_positions'] = league_response.json()[i]['roster_positions']
+
     league_users_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[i]['league_id']}/users")
     rosters_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[i]['league_id']}/rosters")
     #players_response = requests.get("https://api.sleeper.app/v1/players/nfl")
 
     for x in range(len(rosters_response.json())):
-        if league_users_response.json()[x]['display_name'] == username:
             for y in range(len(rosters_response.json())):
                 if(league_users_response.json()[x]['user_id'] == rosters_response.json()[y]['owner_id']):
-                    return rosters_response.json()[y]['players']
-    
-    
+                    players_dict[league_users_response.json()[x]['display_name']] = rosters_response.json()[y]['players']
+
+    return players_dict
 
 app = Flask(__name__)
 @app.route('/getPlayerStats/<string:name>', methods=['GET'])
@@ -74,7 +79,8 @@ def get_top():
 @app.route('/getUserTeam/<string:name>/<string:league>', methods=['GET'])
 def get_player_team(name, league):
     result = call_api(name, league)
-    return (jsonify(result))
+    suggestor.suggest_trades(result)
+    return (jsonify(result[name]))
 
 
 if __name__ == '__main__':

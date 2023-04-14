@@ -4,6 +4,9 @@
 import pandas as pd
 PRINT_DEBUG = False
 
+playerfiles = ['qb_preds_seasonal.csv','wr_preds_seasonal.csv','te_preds_seasonal.csv','rb_preds_seasonal.csv']
+leaguefile = "league.txt"
+
 def printd(string):
     if PRINT_DEBUG:
         print(str(string))
@@ -324,10 +327,11 @@ class Suggestor():
 
 
 def main():
-    leaguefile = "league.txt"
-    playerfiles = ['qb_preds_seasonal.csv','wr_preds_seasonal.csv','te_preds_seasonal.csv','rb_preds_seasonal.csv']
     sug = Suggestor(playerfiles,leaguefile)
     sug.generate_trades(0,5)
     sug.print_trades()
+
+def suggest_trades(player_dict):
+    sug = Suggestor(playerfiles, leaguefile)
 
 main()
