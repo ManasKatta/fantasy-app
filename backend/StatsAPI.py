@@ -6,6 +6,7 @@ from flaskext.mysql import MySQL
 import requests
 import suggestor
 
+
 host = 'localhost'
 user = 'root'
 password = 'Manas135'
@@ -81,6 +82,8 @@ def get_player_team(name, league):
     result = call_api(name, league)
     suggestor.suggest_trades(result)
     return (jsonify(result[name]))
+
+
 
 
 if __name__ == '__main__':

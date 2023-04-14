@@ -6,9 +6,9 @@ import Players from "../Players.json";
 
 const PlayerCard = ({ playerID }) => {
   const url = `https://www.nfl.com/players/${Players[playerID].first_name}-${Players[playerID].last_name}/`;
-  const teamURL = `https://sleepercdn.com/images/team_logos/nfl/${Players[
-    playerID
-  ].team.toLowerCase()}.png`;
+  // const teamURL = `https://sleepercdn.com/images/team_logos/nfl/${Players[
+  //   playerID
+  // ].team.toLowerCase()}.png`;
   const pfpURL = `https://sleepercdn.com/content/nfl/players/${playerID}.jpg`;
 
   const [stats, setStats] = useState([]);
@@ -34,8 +34,9 @@ const PlayerCard = ({ playerID }) => {
       });
   }, [playerID]);
 
-  console.log(stats);
-  console.log(value);
+  // console.log(stats);
+  // console.log(value);
+ // console.log((Players[playerID].team).toLowerCase());
 
   return (
     <div className="py-0.5">
@@ -60,7 +61,7 @@ const PlayerCard = ({ playerID }) => {
 
               <p className="text-sm text-[#a2d4ef] mt-1 line-clamp-2">
                 {Players[playerID].position}{" "}
-                <img className="h-7 w-7 inline" src={teamURL} alt="team logo" />{" "}
+                {/* <img className="h-7 w-7 inline" src={teamURL} alt="team logo" />{" "} */}
                 FPTS: {stats[0]?.PPR}
                 <br />
                 Pos: {stats[0]?.PosRank} OVR: {stats[0]?.OvRank} 
