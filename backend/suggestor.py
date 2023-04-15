@@ -2,10 +2,11 @@
 # It outputs an array of trades and the value of each trade.
 
 import pandas as pd
-PRINT_DEBUG = False
+import json
+import re
+PRINT_DEBUG = True
 
 playerfiles = ['suggest/qb_preds_seasonal.csv','suggest/wr_preds_seasonal.csv','suggest/te_preds_seasonal.csv','suggest/rb_preds_seasonal.csv']
-leaguefile = "league.txt"
 
 def printd(string):
     if PRINT_DEBUG:
@@ -13,9 +14,43 @@ def printd(string):
 
     return
 
+def readjson():
+    f = open('suggest/json/Players.json')
+    pjson = f.readlines()
+    pjson =' '.join(pjson)
+    playerjson = json.loads(pjson)
+
+    pdict = {}
+    for sid in playerjson:
+        if(re.search('[a-zA-Z]',sid)):
+           continue
+        info = playerjson[sid]
+        pdict.update({info['search_full_name']:sid})
+        print(str(info['search_full_name']))
+    return playerjson, pdict
+
+player_dict_sid, player_dict_name = readjson()
+
+def get_player_sid(name):
+    name = str(name)
+    name = name.replace('-','')
+    name = ''.join([i for i in name if not i.isdigit()])
+    sid = ''
+    try:
+        sid = player_dict_name[name]
+    finally:
+        return sid
+
+def get_player_name(sid):
+    if(re.search('[a-zA-Z]',sid)):
+        return sid
+    name = player_dict_sid[sid]['search_full_name']
+    return name
+
 class Player():
-    def __init__(self, sleeper_id, position, points):
-        self.id = sleeper_id
+    def __init__(self, name, position, points):
+        self.id = name
+        self.sid = get_player_sid(self.id)
         self.proj = points
         self.pos = position
         self.paa = 0
@@ -24,7 +59,7 @@ class Player():
 
     def get_paa(self, avg):
         self.paa = self.proj - avg
-        printd(f"paa: {self.paa}")
+        #printd(f"paa: {self.paa}")
         return
 
     def get_par(self, repl):
@@ -32,7 +67,7 @@ class Player():
         return
 
     def print_player(self):
-        printd(f"ID = {self.id}, Position = {self.pos}, Points = {self.proj}, PAA = {self.paa}, PAR = {self.par}")
+        #printd(f"ID = {self.id}, Position = {self.pos}, Points = {self.proj}, PAA = {self.paa}, PAR = {self.par}")
         return
 
 class Trade():
@@ -70,7 +105,7 @@ class Trade():
 
 class Suggestor():
 
-    def __init__(self, playerfiles, leaguefile):
+    def __init__(self, playerfiles, rosterinfo, rosterlist):
         self.league_size = 0
         self.rb_num = 0
         self.wr_num = 0
@@ -82,7 +117,7 @@ class Suggestor():
         for pf in playerfiles:
             self.read_player_info(pf)
 
-        self.read_league_info(leaguefile)
+        self.read_league_info(rosterinfo, rosterlist)
 
         self.make_arrays()
         self.sort_pts()
@@ -95,7 +130,9 @@ class Suggestor():
 
     def get_player(self, id):
         for p in self.player_list:
-            if p.id==id:
+            name1 = p.id.replace('-','')
+            name = ''.join([i for i in name1 if not i.isdigit()])
+            if id==name:
                 return p
 
     def read_player_info(self, playerfile):                                     # Reads from the player data input file
@@ -113,30 +150,34 @@ class Suggestor():
             self.player_list.append(p)
         return
 
-    def read_league_info(self, leaguefile):                                     # Reads from the league info file
-        self.league_size = 2
+    def read_league_info(self, rosterinfo, rosterlist):                                     # Reads from the league info file
+        self.league_size = len(rosterlist)
         self.league_ppr = 0
-        self.rb_num = 2
-        self.wr_num = 2
-        self.qb_num = 1
-        self.te_num = 1
-
-        rosters = [['josh-allen-4','jonathan-taylor','derrick-henry','justin-jefferson','cooper-kupp','mark-andrews'],['patrick-mahomes','dalvin-cook','austin-ekeler','tyreek-hill','jaylen-waddle','travis-kelce']]
+        self.rb_num = rosterinfo.count('RB')
+        self.wr_num = rosterinfo.count('WR')
+        self.qb_num = rosterinfo.count('QB')
+        self.te_num = rosterinfo.count('TE')
         self.roster_list = []
 
-        for r in rosters:
+        for r in rosterlist[1:]:
             r1 = []
             for p in r:
-                p1 = self.get_player(p)
-                r1.append(p1)
+                print('player here')
+                pname = get_player_name(p)
+                print(str(pname))
+                p1 = self.get_player(pname)
+                if p1:
+                    r1.append(p1)
             self.roster_list.append(r1)
 
-        p1roster = ['josh-allen-4','jonathan-taylor','derrick-henry','justin-jefferson','cooper-kupp','mark-andrews']
+        p1roster = rosterlist[0]
         self.p1_roster = []
 
         for p in p1roster:
-            p1 = self.get_player(p)
-            self.p1_roster.append(p1)
+            pname = get_player_name(p)
+            p1 = self.get_player(pname)
+            if p1:
+                self.p1_roster.append(p1)
 
         printd(f'RB num: {self.rb_num}')
         return
@@ -205,7 +246,7 @@ class Suggestor():
         self.te_avg = self.get_pos_average("te", self.te_list)
         self.qb_avg = self.get_pos_average("qb", self.qb_list)
         for p1 in self.player_list:
-            printd("here")
+            #printd("here")
             if p1.pos == 'wr':
                 p1.get_paa(self.wr_avg)
             if p1.pos == 'rb':
@@ -243,7 +284,8 @@ class Suggestor():
 
     def get_11(self, roster):
         for p1 in self.p1_roster:
-            printd('here')
+            print('p1 = '+str(p1))
+            #printd('here')
             for p2 in roster:
                 printd('now here')
                 t1 = Trade([p1],[p2])
@@ -311,6 +353,7 @@ class Suggestor():
         self.trade_value_min = value_min
         self.trade_value_max = value_max
         self.trade_list = []
+        printd('printing rosters')
         printd(str(self.roster_list))
         for roster in self.roster_list:
             printd(str(roster))
@@ -326,11 +369,18 @@ class Suggestor():
             trade.print_trade()
 
 
+samplerosterinfo = ['QB', 'RB', 'RB', 'WR', 'WR', 'TE', 'FLEX', 'FLEX', 'K', 'DEF', 'BN', 'BN', 'BN', 'BN', 'BN']
+samplerosterlist = [['1264', '1426', '1466', '1479', '3321', '4137', '4984', '5850', '5859', '6813', '6819', '7611', '8151', '8155'], ['3164', '4029', '4035', '4037', '4663', '5012', '5095', '5872', '5967', '6770', '6786', '7525', '7528', '7564', 'DAL'], ['2133', '2309', '3198', '4034', '4217', '4866', '4988', '5927', '6790', '6904', '7526', '7547', '7588', '7839', 'SF'], ['2216', '2449', '4018', '4039', '4046', '4199', '5844', '5846', '6794', '6801', '6806', '6938', '7042', '7543', 'BUF']]
+
 def main():
-    sug = Suggestor(playerfiles,leaguefile)
-    sug.generate_trades(0,5)
+    sug = Suggestor(playerfiles, samplerosterinfo, samplerosterlist)
+    sug.generate_trades(0,.1)
     sug.print_trades()
 
-def suggest_trades(player_dict):
-    sug = Suggestor(playerfiles, leaguefile)
+def suggest_trades(rosterinfo, rosterlist):
+    sug = Suggestor(playerfiles, rosterinfo, rosterlist)
+    sug.generate_trades(0,.1)
     sug.print_trades()
+    return sug.trade_list
+
+main()
