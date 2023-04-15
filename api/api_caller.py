@@ -52,10 +52,13 @@ def call_api(username, league_name):
         print("Error!")
         sys.exit()
 
+    print(f"Roster positions: {league_response.json()[i]['roster_positions']}")
+
     league_users_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[0]['league_id']}/users")
     rosters_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[0]['league_id']}/rosters")
     players_response = requests.get("https://api.sleeper.app/v1/players/nfl")
 
+    print()
 
     for x in range(len(rosters_response.json())):
         if league_users_response.json()[x]['display_name'] == username:
