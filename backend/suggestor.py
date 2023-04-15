@@ -331,7 +331,7 @@ def main():
     sug.generate_trades(0,5)
     sug.print_trades()
 
-def suggest_trades(player_dict):
+def suggest_trades(roster_positions, players):
     sug = Suggestor(playerfiles, leaguefile)
 
 main()
