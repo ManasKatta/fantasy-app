@@ -4,7 +4,7 @@
 import pandas as pd
 PRINT_DEBUG = False
 
-playerfiles = ['qb_preds_seasonal.csv','wr_preds_seasonal.csv','te_preds_seasonal.csv','rb_preds_seasonal.csv']
+playerfiles = ['suggest/qb_preds_seasonal.csv','suggest/wr_preds_seasonal.csv','suggest/te_preds_seasonal.csv','suggest/rb_preds_seasonal.csv']
 leaguefile = "league.txt"
 
 def printd(string):
@@ -333,5 +333,4 @@ def main():
 
 def suggest_trades(roster_positions, players):
     sug = Suggestor(playerfiles, leaguefile)
-
-main()
+    sug.print_trades()
