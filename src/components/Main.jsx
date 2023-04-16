@@ -72,7 +72,7 @@ function Main() {
         </div>
 
         <div className="px-10"></div>
-        {trades && (
+        {trades ? (
           <div className="text-white px-2 py-2 font-bold bg-[#121212] rounded-lg overflow-auto scroll-smooth scrollbar-hide">
             Trade Suggestion #1
             {trades[0][0].map((playerID) => (
@@ -91,7 +91,7 @@ function Main() {
               <PlayerCard playerID={playerID} />
             ))}
           </div>
-        )}
+        ) : null}
 
         <div className="px-10"></div>
 
