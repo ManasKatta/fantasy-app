@@ -5,9 +5,9 @@ import { useEffect, useState } from "react";
 
 function Main() {
   const [players, setPlayers] = useState([]);
-  const [trades2, setTrades] = useState([]);
+  const [trades, setTrades] = useState([]);
   //const players = ["4046", "3198", "4034", "2133", "7564", "3321", "6794", "1466", "5850"];
-  const trades = [
+  /*const trades = [
     [
       ["4046", "6794"],
       ["4984", "4039"],
@@ -15,8 +15,8 @@ function Main() {
     [
       ["3198", "4034"],
       ["4984", "4039"],
-    ],
-  ];
+    ]
+  ];*/
   const [trending, setTrending] = useState([]);
   const [username, setUsername] = useState("");
   const [league, setLeague] = useState("");
@@ -35,7 +35,7 @@ function Main() {
         .then((response) => {
           setPlayers(response.data);
         });
-      axios.get(`http://localhost:7000/getTrades/`).then((response) => {
+      axios.get(`http://localhost:5000/getTrades/${username}/${league}`).then((response) => {
         setTrades(response.data);
       });
     }
@@ -72,7 +72,7 @@ function Main() {
         </div>
 
         <div className="px-10"></div>
-        {trades ? (
+        {trades.length > 0 && (
           <div className="text-white px-2 py-2 font-bold bg-[#121212] rounded-lg overflow-auto scroll-smooth scrollbar-hide">
             Trade Suggestion #1
             {trades[0][0].map((playerID) => (
@@ -91,7 +91,7 @@ function Main() {
               <PlayerCard playerID={playerID} />
             ))}
           </div>
-        ) : null}
+        )}
 
         <div className="px-10"></div>
 

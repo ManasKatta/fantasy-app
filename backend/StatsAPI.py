@@ -85,10 +85,11 @@ def get_player_team(name, league):
     result = call_api(name, league)
     return (jsonify(result))
 
-@app.route('/getTrades/', methods=['GET'])
-def get_trades():
-    result = suggestor.suggest_trades(players_dict['roster_positions'], players_dict['teams'])
-    return (jsonify(result))
+@app.route('/getTrades/<string:name>/<string:league>', methods=['GET'])
+def get_trades(name, league):
+    result = call_api(name, league)
+    result_2 = suggestor.suggest_trades(players_dict['roster_positions'], players_dict['teams'])
+    return (jsonify(result_2))
 
 
 if __name__ == '__main__':
