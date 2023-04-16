@@ -368,6 +368,29 @@ class Suggestor():
         for trade in self.trade_list:
             trade.print_trade()
 
+def make_trade_list(trade_list):
+    new_trade_list = []
+
+    for x in range(5):
+        trade = []
+
+        given = trade_list[x].get_given()
+        given_ids = []
+        for player in given:
+            given_ids.append(player.sid)
+        trade.append(given_ids)
+
+        received = trade_list[x].get_received()
+        received_ids = []
+        for player in received:
+            received_ids.append(player.sid)
+        trade.append(received_ids)
+
+        new_trade_list.append(trade)
+
+    return new_trade_list
+
+
 
 samplerosterinfo = ['QB', 'RB', 'RB', 'WR', 'WR', 'TE', 'FLEX', 'FLEX', 'K', 'DEF', 'BN', 'BN', 'BN', 'BN', 'BN']
 samplerosterlist = [['1264', '1426', '1466', '1479', '3321', '4137', '4984', '5850', '5859', '6813', '6819', '7611', '8151', '8155'], ['3164', '4029', '4035', '4037', '4663', '5012', '5095', '5872', '5967', '6770', '6786', '7525', '7528', '7564', 'DAL'], ['2133', '2309', '3198', '4034', '4217', '4866', '4988', '5927', '6790', '6904', '7526', '7547', '7588', '7839', 'SF'], ['2216', '2449', '4018', '4039', '4046', '4199', '5844', '5846', '6794', '6801', '6806', '6938', '7042', '7543', 'BUF']]
@@ -381,6 +404,7 @@ def suggest_trades(rosterinfo, rosterlist):
     sug = Suggestor(playerfiles, rosterinfo, rosterlist)
     sug.generate_trades(0,.1)
     sug.print_trades()
-    return sug.trade_list
+    result = make_trade_list(sug.trade_list)
+    return result
 
 main()

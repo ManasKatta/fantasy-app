@@ -5,8 +5,9 @@ import { useEffect, useState } from "react";
 
 function Main() {
   const [players, setPlayers] = useState([]);
+  const [trades2, setTrades] = useState([]);
   //const players = ["4046", "3198", "4034", "2133", "7564", "3321", "6794", "1466", "5850"];
-  const trades = [["4046", "6794"], ["4984", "4039"]];
+  const trades = [[["4046", "6794"], ["4984", "4039"]], [["3198", "4034"], ["4984", "4039"]]];
   const [trending, setTrending] = useState([]);
   const [username, setUsername] = useState("");
   const [league, setLeague] = useState("");
@@ -24,6 +25,11 @@ function Main() {
       .get(`http://localhost:5000/getUserTeam/${username}/${league}`)
       .then((response) => {
         setPlayers(response.data);
+      });
+      axios
+      .get(`http://localhost:7000/getTrades/`)
+      .then((response) => {
+        setTrades(response.data);
       });
     }
   };
@@ -62,12 +68,21 @@ function Main() {
         <div className="px-10"></div>
 
         <div className="text-white px-2 py-2 font-bold bg-[#121212] rounded-lg overflow-auto scroll-smooth scrollbar-hide">
-          Trade Suggestion
-          {trades[0].map((playerID) => (
+          Trade Suggestion #1
+          {trades[0][0].map((playerID) => (
             <PlayerCard playerID={playerID} />
           ))}
           FOR
-          {trades[1].map((playerID) => (
+          {trades[0][1].map((playerID) => (
+            <PlayerCard playerID={playerID} />
+          ))}
+
+          Trade Suggestion #2
+          {trades[1][0].map((playerID) => (
+            <PlayerCard playerID={playerID} />
+          ))}
+          FOR
+          {trades[1][1].map((playerID) => (
             <PlayerCard playerID={playerID} />
           ))}
         </div>
