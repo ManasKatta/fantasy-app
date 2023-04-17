@@ -32,10 +32,11 @@ function Main() {
 
   // console.log(trending);
   return (
-    <div>
+    <div className="bg-black py-10">
       <form>
-        <h3>username: </h3>
+        <h3 className="text-[#a2d4ef]">username: </h3>
         <input
+          className="text-black bg-[#ffb7c5]"
           type="text"
           name="username"
           value={username}
@@ -43,8 +44,9 @@ function Main() {
           placeholder="Enter name here"
           onKeyPress={getTeam}
         ></input>
-        <h3>league name:</h3>
+        <h3 className="text-[#a2d4ef]">league name:</h3>
         <input
+          className="bg-[#ffb7c5] text-black"
           type="text"
           name="league"
           value={league}

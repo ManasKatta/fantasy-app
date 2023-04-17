@@ -69,7 +69,7 @@ const PlayerCard = ({ playerID }) => {
                 {Players[playerID].college}
               </p>
             </div>
-            <div className="text-[#9fe2bf]">Trade Value: {parseFloat(value[0]).toFixed(2)}</div>
+            {/* <div className="text-[#9fe2bf]">Trade Value: {parseFloat(value[0]).toFixed(2)}</div> */}
           </div>
         </div>
       </a>
