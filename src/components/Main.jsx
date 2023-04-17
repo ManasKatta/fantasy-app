@@ -6,17 +6,6 @@ import { useEffect, useState } from "react";
 function Main() {
   const [players, setPlayers] = useState([]);
   const [trades, setTrades] = useState([]);
-  //const players = ["4046", "3198", "4034", "2133", "7564", "3321", "6794", "1466", "5850"];
-  /*const trades = [
-    [
-      ["4046", "6794"],
-      ["4984", "4039"],
-    ],
-    [
-      ["3198", "4034"],
-      ["4984", "4039"],
-    ]
-  ];*/
   const [trending, setTrending] = useState([]);
   const [username, setUsername] = useState("");
   const [league, setLeague] = useState("");
@@ -72,9 +61,11 @@ function Main() {
         </div>
 
         <div className="px-10"></div>
-        {trades.length > 0 && (
           <div className="text-white px-2 py-2 font-bold bg-[#121212] rounded-lg overflow-auto scroll-smooth scrollbar-hide">
-            Trade Suggestion #1
+          Trade Suggestions
+          {trades.length > 0 && (
+            <div>
+            Suggestion #1
             {trades[0][0].map((playerID) => (
               <PlayerCard playerID={playerID} />
             ))}
@@ -82,7 +73,7 @@ function Main() {
             {trades[0][1].map((playerID) => (
               <PlayerCard playerID={playerID} />
             ))}
-            Trade Suggestion #2
+            Suggestion #2
             {trades[1][0].map((playerID) => (
               <PlayerCard playerID={playerID} />
             ))}
@@ -90,8 +81,33 @@ function Main() {
             {trades[1][1].map((playerID) => (
               <PlayerCard playerID={playerID} />
             ))}
+            Suggestion #3
+            {trades[2][0].map((playerID) => (
+              <PlayerCard playerID={playerID} />
+            ))}
+            FOR
+            {trades[2][1].map((playerID) => (
+              <PlayerCard playerID={playerID} />
+            ))}
+            Suggestion #4
+            {trades[3][0].map((playerID) => (
+              <PlayerCard playerID={playerID} />
+            ))}
+            FOR
+            {trades[3][1].map((playerID) => (
+              <PlayerCard playerID={playerID} />
+            ))}
+            Suggestion #5
+            {trades[4][0].map((playerID) => (
+              <PlayerCard playerID={playerID} />
+            ))}
+            FOR
+            {trades[4][1].map((playerID) => (
+              <PlayerCard playerID={playerID} />
+            ))}
+            </div>
+            )}
           </div>
-        )}
 
         <div className="px-10"></div>
 
