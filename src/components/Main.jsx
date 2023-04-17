@@ -41,6 +41,7 @@ function Main() {
           value={username}
           onChange={(event) => setUsername(event.target.value)}
           placeholder="Enter name here"
+          onKeyPress={getTeam}
         ></input>
         <h3>league name:</h3>
         <input

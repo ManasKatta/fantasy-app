@@ -12,8 +12,6 @@ user = 'root'
 password = 'Manas135'
 database = 'capstone'
 
-players_dict = {}
-
 
 def call_api(username, league_name):
     try:
@@ -30,6 +28,7 @@ def call_api(username, league_name):
     if i == -1:
         return "Error: League not found"
 
+    players_dict = {}
     players_dict['roster_positions'] = league_response.json()[i]['roster_positions']
     players_dict['teams'] = []
 
@@ -37,7 +36,7 @@ def call_api(username, league_name):
     rosters_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[i]['league_id']}/rosters")
     #players_response = requests.get("https://api.sleeper.app/v1/players/nfl")
 
-    for x in range(len(rosters_response.json())):
+    for x in range(len(league_users_response.json())):
             for y in range(len(rosters_response.json())):
                 if(league_users_response.json()[x]['user_id'] == rosters_response.json()[y]['owner_id']):
                     if league_users_response.json()[x]['display_name'] == username:
@@ -45,7 +44,7 @@ def call_api(username, league_name):
                     else:
                         players_dict['teams'].append(rosters_response.json()[y]['players'])
 
-    return players_dict['teams'][0]
+    return players_dict
 
 app = Flask(__name__)
 @app.route('/getPlayerStats/<string:name>', methods=['GET'])
@@ -83,13 +82,13 @@ def get_top():
 @app.route('/getUserTeam/<string:name>/<string:league>', methods=['GET'])
 def get_player_team(name, league):
     result = call_api(name, league)
-    return (jsonify(result))
+    return (jsonify(result['teams'][0]))
 
 @app.route('/getTrades/<string:name>/<string:league>', methods=['GET'])
 def get_trades(name, league):
-    result = call_api(name, league)
-    result_2 = suggestor.suggest_trades(players_dict['roster_positions'], players_dict['teams'])
-    return (jsonify(result_2))
+    api_result = call_api(name, league)
+    result = suggestor.suggest_trades(api_result['roster_positions'], api_result['teams'])
+    return (jsonify(result))
 
 
 if __name__ == '__main__':
