@@ -12,8 +12,6 @@ user = 'root'
 password = 'Manas135'
 database = 'capstone'
 
-players_dict = {}
-
 
 def call_api(username, league_name):
     try:
@@ -30,21 +28,21 @@ def call_api(username, league_name):
     if i == -1:
         return "Error: League not found"
 
-    
+    players_dict = {}
     players_dict['roster_positions'] = league_response.json()[i]['roster_positions']
-    players_dict['players'] = []
+    players_dict['teams'] = []
 
     league_users_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[i]['league_id']}/users")
     rosters_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[i]['league_id']}/rosters")
     #players_response = requests.get("https://api.sleeper.app/v1/players/nfl")
 
-    for x in range(len(rosters_response.json())):
+    for x in range(len(league_users_response.json())):
             for y in range(len(rosters_response.json())):
                 if(league_users_response.json()[x]['user_id'] == rosters_response.json()[y]['owner_id']):
                     if league_users_response.json()[x]['display_name'] == username:
-                        players_dict['players'].insert(0, rosters_response.json()[y]['players'])
+                        players_dict['teams'].insert(0, rosters_response.json()[y]['players'])
                     else:
-                        players_dict['players'].append(rosters_response.json()[y]['players'])
+                        players_dict['teams'].append(rosters_response.json()[y]['players'])
 
     return players_dict
 
@@ -84,11 +82,13 @@ def get_top():
 @app.route('/getUserTeam/<string:name>/<string:league>', methods=['GET'])
 def get_player_team(name, league):
     result = call_api(name, league)
-    print(result['roster_positions'])
-    print(result['players'])
-    suggestor.suggest_trades(result['roster_positions'], result['players'])
-    return (jsonify(result['players'][0]))
+    return (jsonify(result['teams'][0]))
 
+@app.route('/getTrades/<string:name>/<string:league>', methods=['GET'])
+def get_trades(name, league):
+    api_result = call_api(name, league)
+    result = suggestor.suggest_trades(api_result['roster_positions'], api_result['teams'])
+    return (jsonify(result))
 
 
 if __name__ == '__main__':
