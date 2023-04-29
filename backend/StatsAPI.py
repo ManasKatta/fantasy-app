@@ -30,8 +30,9 @@ def call_api(username, league_name):
     if i == -1:
         return "Error: League not found"
 
-    players_dict['username'] = username
+    
     players_dict['roster_positions'] = league_response.json()[i]['roster_positions']
+    players_dict['players'] = []
 
     league_users_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[i]['league_id']}/users")
     rosters_response = requests.get(f"https://api.sleeper.app/v1/league/{league_response.json()[i]['league_id']}/rosters")
@@ -40,7 +41,10 @@ def call_api(username, league_name):
     for x in range(len(rosters_response.json())):
             for y in range(len(rosters_response.json())):
                 if(league_users_response.json()[x]['user_id'] == rosters_response.json()[y]['owner_id']):
-                    players_dict[league_users_response.json()[x]['display_name']] = rosters_response.json()[y]['players']
+                    if league_users_response.json()[x]['display_name'] == username:
+                        players_dict['players'].insert(0, rosters_response.json()[y]['players'])
+                    else:
+                        players_dict['players'].append(rosters_response.json()[y]['players'])
 
     return players_dict
 
@@ -80,9 +84,10 @@ def get_top():
 @app.route('/getUserTeam/<string:name>/<string:league>', methods=['GET'])
 def get_player_team(name, league):
     result = call_api(name, league)
-    suggestor.suggest_trades(result)
-    return (jsonify(result[name]))
-
+    print(result['roster_positions'])
+    print(result['players'])
+    suggestor.suggest_trades(result['roster_positions'], result['players'])
+    return (jsonify(result['players'][0]))
 
 
 
